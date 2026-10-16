@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://diegocroce.github.io/enterprisemcp/sitemap.xml
