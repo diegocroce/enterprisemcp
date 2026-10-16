@@ -24,13 +24,13 @@ footer{margin:40px 0 0;padding:24px 0;background:#0f172a;color:#94a3b8}footer fo
 def col(n): return '#16a34a' if n>=70 else '#ca8a04' if n>=45 else '#dc2626'
 def badge(s): return f'<span class="sc" style="background:{col(s["score"])}">{s["score"]}</span>'
 def page(path,title,desc,body):
-    nav='<a href="/">Directory</a><a href="/systems/">Systems</a><a href="/methodology/">Methodology</a><a href="/submit/">Submit</a><a href="/sponsor/">Sponsor</a>'
+    nav='<a href="/">Directory</a><a href="/systems/">Systems</a><a href="/methodology/">Methodology</a><a href="/submit/">Submit</a><a href="/sponsor/">Sponsor</a><a href="https://buttondown.com/enterprisemcp">Subscribe</a>'
     doc=f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title><meta name="description" content="{e(desc)}"><link rel="canonical" href="{BASE}{path}">
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:type" content="website">
 <link rel="stylesheet" href="/style.css"></head><body><header><div class="w"><a class="logo" href="/">EnterpriseMCP</a>{nav}</div></header>
 <main class="w">{body}</main><footer><div class="w"><strong style="color:#fff">The EnterpriseMCP newsletter</strong> — new and re-rated enterprise MCP servers, monthly.
-<form onsubmit="event.preventDefault();this.innerHTML='<span>Thanks! (placeholder — no data is sent)</span>'"><input type="email" required placeholder="you@company.com" aria-label="Email"><button>Subscribe</button></form>
+<form action="https://buttondown.com/api/emails/embed-subscribe/enterprisemcp" method="post" target="_blank"><input type="email" name="email" required placeholder="you@company.com" aria-label="Email"><button type="submit">Subscribe</button></form>
 </div></footer></body></html>"""
     f=OUT/path.strip('/')/'index.html' if path.endswith('/') else OUT/path; f.parent.mkdir(parents=True,exist_ok=True); doc=re.sub(r'(href|src|action)="/(?!/)',lambda m:f'{m.group(1)}="{PREFIX}/',doc).replace('href="{BASE}'.replace('{BASE}',BASE+PREFIX),'href="'+BASE); f.write_text(doc); pages.append(path)
 def row(s):
