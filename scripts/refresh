@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+"""Refresh stars / last_updated / license / archived from the GitHub REST API, recompute scores.
+Usage: scripts/refresh [--limit N] [--only owner/repo ...]   (set GITHUB_TOKEN to avoid the 60 req/h anonymous limit)
+Then rebuild: python3 site/build.py"""
+import json, os, sys, urllib.request, pathlib
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from score import score
+P=pathlib.Path(__file__).resolve().parents[1]/'data/servers.json'
+args=sys.argv[1:]; limit=int(args[args.index('--limit')+1]) if '--limit' in args else None
+only={a.lower() for a in args[args.index('--only')+1:]} if '--only' in args else None
+data=json.load(open(P)); n=0
+h={'Accept':'application/vnd.github+json','User-Agent':'enterprisemcp-refresh'}
+if os.environ.get('GITHUB_TOKEN'): h['Authorization']='Bearer '+os.environ['GITHUB_TOKEN']
+for s in data['servers']:
+    r=s.get('repo')
+    if not r or (only and r.lower() not in only): continue
+    if limit is not None and n>=limit: break
+    n+=1
+    try:
+        j=json.load(urllib.request.urlopen(urllib.request.Request('https://api.github.com/repos/'+r,headers=h),timeout=20))
+    except Exception as e:
+        print('FAIL',r,e); continue
+    s['stars']=j['stargazers_count']; s['last_updated']=j['pushed_at'][:10]; s['archived']=j['archived']
+    s['license']=(j.get('license') or {}).get('spdx_id') or 'unknown'
+    print('ok',r,s['stars'],s['last_updated'],s['license'])
+for s in data['servers']: s['score'],s['score_breakdown']=score(s)
+import datetime; data['generated']=datetime.date.today().isoformat()
+json.dump(data,open(P,'w'),indent=1)
