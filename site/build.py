@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Static site generator for EnterpriseMCP. python3 site/build.py -> site/dist"""
-import json, pathlib, html, shutil, sys, re
+import json, pathlib, html, shutil, sys, re, datetime
 R=pathlib.Path(__file__).resolve().parent; ROOT=R.parent
 sys.path.insert(0,str(ROOT/'scripts')); from score import RUBRIC
 PREFIX='/enterprisemcp'  # GitHub Pages project subpath
 BASE='https://diegocroce.github.io'+PREFIX
 D=json.load(open(ROOT/'data/servers.json')); S=sorted(D['servers'],key=lambda s:-s['score'])
+REFRESH=D.get('generated') or datetime.date.today().isoformat()
 OUT=R/'dist'; shutil.rmtree(OUT,ignore_errors=True); OUT.mkdir()
 e=lambda x:html.escape(str(x if x is not None else 'unknown'))
 slug=lambda x:re.sub(r'[^a-z0-9]+','-',x.lower()).strip('-')
@@ -31,6 +32,7 @@ def page(path,title,desc,body):
 <link rel="stylesheet" href="/style.css"></head><body><header><div class="w"><a class="logo" href="/">EnterpriseMCP</a>{nav}</div></header>
 <main class="w">{body}</main><footer><div class="w"><strong style="color:#fff">The EnterpriseMCP newsletter</strong> — new and re-rated enterprise MCP servers, monthly.
 <form action="https://buttondown.com/api/emails/embed-subscribe/enterprisemcp" method="post" target="_blank"><input type="email" name="email" required placeholder="you@company.com" aria-label="Email"><button type="submit">Subscribe</button></form>
+<p style="margin:12px 0 0">Data refreshed {REFRESH}</p>
 </div></footer></body></html>"""
     f=OUT/path.strip('/')/'index.html' if path.endswith('/') else OUT/path; f.parent.mkdir(parents=True,exist_ok=True); doc=re.sub(r'(href|src|action)="/(?!/)',lambda m:f'{m.group(1)}="{PREFIX}/',doc).replace('href="{BASE}'.replace('{BASE}',BASE+PREFIX),'href="'+BASE); f.write_text(doc); pages.append(path)
 def row(s):
