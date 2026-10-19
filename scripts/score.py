@@ -1,6 +1,6 @@
 """Enterprise-readiness rubric (0-100). Unknown always scores 0 for that criterion."""
 import math, datetime
-TODAY=datetime.date(2026,10,16)
+TODAY=datetime.date.today()
 def _date(s):
     try: return datetime.date.fromisoformat(s[:10])
     except Exception:
